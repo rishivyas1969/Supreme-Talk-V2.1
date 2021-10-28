@@ -1,12 +1,12 @@
 from flask import Flask, request, jsonify
 import os.path
 
-from save_text import take_text
+from save_text import take_text, declare_list
 from upload_drive import upload, authoriseDrive
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/home')
 def home():
     authoriseDrive()
     if os.path.exists('token.json'):
@@ -18,6 +18,7 @@ def home():
         "version": 1.2,
         "message": msg
     }
+    declare_list()
     return jsonify(data)
 
 @app.route('/taketext', methods=['GET', 'POST'])

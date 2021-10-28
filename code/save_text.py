@@ -1,7 +1,5 @@
 from datetime import datetime
 
-texts = list
-
 def searchForPhrase(text):
 
     if "save me" in text:
@@ -33,3 +31,11 @@ def take_text(text):
     print(text)
     return msg
 
+def declare_list():
+        global texts
+        texts = []
+        print("List declared.")
+
+if __name__ == "__main__":
+
+    declare_list()
