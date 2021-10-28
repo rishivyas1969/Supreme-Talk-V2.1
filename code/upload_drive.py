@@ -85,47 +85,51 @@ def authoriseDrive():
             token.write(creds.to_json())
 
 def upload():
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-    else:
-        authoriseDrive()
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    try:
+        if os.path.exists('token.json'):
+            creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+        else:
+            authoriseDrive()
+            creds = Credentials.from_authorized_user_file('token.json', SCOPES)
 
 
-    service = build('drive', 'v3', credentials=creds)
+        service = build('drive', 'v3', credentials=creds)
 
-    results = service.files().list(
-        pageSize=10, fields="nextPageToken, files(id, name)").execute()
-    items = results.get('files', [])
+        results = service.files().list(
+            pageSize=10, fields="nextPageToken, files(id, name)").execute()
+        items = results.get('files', [])
 
-    folder_id = []
-    for item in items:
-        if item['name'] in 'Supreme Talk':
-            folder_id.append(item['id'])
-            print("folder Found:" + str(folder_id[0]))
-            break
+        folder_id = []
+        for item in items:
+            if item['name'] in 'Supreme Talk':
+                folder_id.append(item['id'])
+                print("folder Found:" + str(folder_id[0]))
+                break
+        
+        if len(folder_id) == 0:
+            file_metadata = {
+                'name': 'Supreme Talk',
+                'mimeType': 'application/vnd.google-apps.folder'
+            }
+            file = service.files().create(body=file_metadata,
+                                                fields='id').execute()
+            folder_id.append(file['id'])
+            print("folder Created: " + str(folder_id[0]))
+
+        media = MediaFileUpload('supremeText.txt', mimetype="text/plain")
+        service.files().create(
+            body = {
+                "name" : "supremeText.txt",
+                "parents" : folder_id
+            },
+            media_body = media,
+            fields = 'id'
+        ).execute()
+
+        return "File Uploaded!"
     
-    if len(folder_id) == 0:
-        file_metadata = {
-            'name': 'Supreme Talk',
-            'mimeType': 'application/vnd.google-apps.folder'
-        }
-        file = service.files().create(body=file_metadata,
-                                            fields='id').execute()
-        folder_id.append(file['id'])
-        print("folder Created: " + str(folder_id[0]))
-
-    media = MediaFileUpload('supremeText.txt', mimetype="text/plain")
-    service.files().create(
-        body = {
-            "name" : "supremeText.txt",
-            "parents" : folder_id
-        },
-        media_body = media,
-        fields = 'id'
-    ).execute()
-
-    print("File Uploaded!")
+    except:
+        return "Failed to upload!"
 
 if __name__ == '__main__':
     main()

@@ -2,9 +2,8 @@ import requests
 import base64
 import json
 
-url = 'http://127.0.0.1:5000/audiototext'
+url = 'http://127.0.0.1:5000/taketext'
 
-audio = open('recording1.wav', 'rb')
 
-r = requests.post(url, files={'file': audio})
+r = requests.post(url, data={'text': "alright nigga save me"})
 print(r.json())

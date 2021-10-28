@@ -1,8 +1,7 @@
 from flask import Flask, request, jsonify
-from werkzeug.utils import secure_filename
 import os.path
 
-from speechToText import convert
+from save_text import take_text
 from upload_drive import upload, authoriseDrive
 
 app = Flask(__name__)
@@ -21,18 +20,15 @@ def home():
     }
     return jsonify(data)
 
-@app.route('/audiototext', methods=['GET', 'POST'])
+@app.route('/taketext', methods=['GET', 'POST'])
 def audio_to_text():
 
     if request.method == 'POST':
-        file = request.files['file']
-        file.save(secure_filename('uploaded'+file.filename))
+        text = request.form['text']
 
-        return {"text": convert('uploaded'+file.filename),
-        "message": "converted"}
+        return {"message": take_text(text)}
     else:
-        return {"text": "None",
-            "message": "POST an audio file."}
+        return {"message": "POST an audio file."}
 
 @app.route('/savefiletodrive', methods=['GET', 'POST'])
 def saveToDrive():
@@ -43,7 +39,13 @@ def saveToDrive():
         flag = request.form['flag']
 
         if flag:
-            upload()
+            str = upload()
+            return {"message": str}
+
+        else: 
+            return {"message": "Flag False."}
+
+    return {"message": "Please POST with flag: True to upload created text file."}
 
 if __name__ == '__main__':
     app.debug=True
